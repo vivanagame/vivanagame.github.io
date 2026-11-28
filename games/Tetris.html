@@ -2,121 +2,198 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Playing Tetris - Vivana-Retro</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- EmulatorJS Core CSS (if you were using it) -->
-    <!-- <link rel="stylesheet" href="https://cdn.emulatorjs.org/stable/data/emulator.css"> -->
-
-    <!-- CUSTOM STYLES TO OVERRIDE EMULATORJS BUTTONS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tetris</title>
     <style>
-        /* 1. Make the EmulatorJS Menu Bar highly visible */
-        .ejs_menu_bar {
-            background: rgba(5, 5, 8, 0.9) !important; /* Dark background */
-            border: 1px solid #00ffff !important; /* Neon Cyan border */
-            border-radius: 8px 8px 0 0 !important;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3) !important;
-        }
-
-        /* 2. Make the icons inside the menu bar bigger, neon, and glowing */
-        .ejs_menu_bar svg {
-            fill: #00ffff !important; /* Neon Cyan color */
-            width: 28px !important;   /* Make them bigger */
-            height: 28px !important;
-            filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.8));
-            transition: transform 0.2s, filter 0.2s !important;
-        }
-
-        /* 3. Add a hover effect to the buttons */
-        .ejs_menu_bar div:hover svg {
-            transform: scale(1.2);
-            filter: drop-shadow(0 0 10px #00ffff);
-        }
-
-        /* 4. Style the Mobile Virtual Gamepad buttons (if applicable) */
-        .ejs_virtual_gamepad button, 
-        .ejs_virtual_gamepad .ejs_dpad_main, 
-        .ejs_virtual_gamepad .ejs_dpad_main div {
-            opacity: 0.7 !important; /* Make buttons slightly transparent so they don't block the game */
-            filter: drop-shadow(0 0 5px #00ffff) !important;
-        }
-
-        /* 5. Game Container to ensure it's responsive and stays in the center */
-        .game-wrapper {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            aspect-ratio: 4 / 3; /* Classic retro aspect ratio */
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
             background: #000;
-            border: 2px solid #00ffff;
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
             overflow: hidden;
-            position: relative;
-            z-index: 10;
+        }
+        #wrapper { position: relative; width: 100vw; height: 100vh; width: 100dvw; height: 100dvh; }
+        #game { width: 100%; height: 100%; }
+        #game canvas { width: 100% !important; height: 100% !important; object-fit: contain; display: block; }
+
+        #custom-prompt {
+            position: absolute; inset: 0;
+            background: rgba(0, 0, 0, 0.75); color: #fff;
+            font-family: sans-serif;
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 9999; user-select: none;
+            touch-action: manipulation;
+        }
+        .ejs_start_button, .ejs_start_overlay, .ejs_loading_icon,
+        [class*="start_overlay"], [class*="loading"] { display: none !important; }
+
+        @media (pointer: fine) { #touch-controls { display: none; } }
+        #touch-controls {
+            position: absolute; inset: 0; pointer-events: none; z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem; touch-action: none;
+        }
+        .control-group { pointer-events: auto; display: flex; gap: 0.5rem; user-select: none; }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.25rem;
+            width: clamp(80px, 20vw, 160px);
+            height: clamp(80px, 20vw, 160px);
+        }
+        .dpad button {
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 8px; color: #fff;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent;
+        }
+        .dpad .up    { grid-column: 2; grid-row: 1; }
+        .dpad .left  { grid-column: 1; grid-row: 2; }
+        .dpad .right { grid-column: 3; grid-row: 2; }
+        .dpad .down  { grid-column: 2; grid-row: 3; }
+
+        .action-buttons { display: flex; gap: 0.75rem; align-items: center; }
+        .action-buttons button {
+            width: clamp(56px, 14vw, 96px);
+            height: clamp(56px, 14vw, 96px);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #fff; font-size: clamp(1.2rem, 4vw, 1.8rem); font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent;
+        }
+        .system-buttons { display: flex; gap: 0.75rem; align-items: center; }
+        .system-buttons button {
+            padding: 0.4rem 0.8rem; border-radius: 20px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #fff; font-size: clamp(0.7rem, 2.5vw, 1rem);
+            cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent;
         }
 
-        /* Responsive tweaks for mobile */
-        @media (max-width: 768px) {
-            .game-wrapper {
-                aspect-ratio: 16 / 9; /* Adjust for mobile landscape if needed */
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-                max-width: 100%;
+        @media (orientation: landscape) {
+            #touch-controls { flex-direction: row; align-items: center; justify-content: space-between; }
+            .dpad           { order: 1; }
+            .system-buttons { order: 2; position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); }
+            .action-buttons { order: 3; }
+        }
+        @media (orientation: portrait) {
+            #touch-controls {
+                display: grid;
+                grid-template-areas: "sys sys" "dpad actions";
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto 1fr;
+                align-items: end; justify-items: center;
+                gap: 1rem; padding: 1rem; padding-bottom: 1.5rem;
             }
+            .system-buttons { grid-area: sys; }
+            .dpad           { grid-area: dpad; }
+            .action-buttons { grid-area: actions; }
         }
     </style>
 </head>
 <body>
+    <div id="wrapper">
+        <div id="game"></div>
+        <div id="custom-prompt">Touch/Click to continue</div>
 
-    <!-- BACKGROUND VIDEO -->
-    <video autoplay muted loop playsinline class="bg-video">
-        <source src="background.webm" type="video/webm">
-    </video>
-
-    <!-- LEFT STICKY MENU -->
-    <nav class="side-menu left">
-        <a href="index.html" class="menu-item">Home</a>
-        <a href="library.html" class="menu-item active">Library</a>
-        <a href="submit.html" class="menu-item">Community</a>
-    </nav>
-
-    <!-- RIGHT STICKY MENU (Socials) -->
-    <nav class="side-menu right">
-        <!-- ... Your Social SVG links ... -->
-    </nav>
-
-    <!-- MAIN GAME SECTION -->
-    <main class="hero" style="padding: 20px;">
-        
-        <!-- Game Container -->
-        <div class="game-wrapper">
-            <!-- EmulatorJS injects the game canvas here -->
-            <div id="game"></div>
+        <div id="touch-controls">
+            <div class="control-group dpad">
+                <button class="up"    data-key="ArrowUp">▲</button>
+                <button class="left"  data-key="ArrowLeft">◀</button>
+                <button class="right" data-key="ArrowRight">▶</button>
+                <button class="down"  data-key="ArrowDown">▼</button>
+            </div>
+            <div class="control-group system-buttons">
+                <button data-key="Enter">Start</button>
+                <button data-key="v">Select</button>
+            </div>
+            <div class="control-group action-buttons">
+                <button data-key="z">A</button>
+                <button data-key="x">B</button>
+            </div>
         </div>
+    </div>
 
-    </main>
-
-    <!-- EMULATOR JS SCRIPT -->
     <script>
-        // Note: Change the paths to where you actually host your EmulatorJS data files
-        EJS_player = "#game";
-        EJS_core = "nes"; // Change to "segaMD", "snes", etc.
-        EJS_gameUrl = "roms/tetris.nes"; // The path to your ROM file
-        EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/"; 
-        
-        // Optional: Force virtual gamepad on mobile
-        EJS_Buttons = {
-            playPause: true,
-            restart: true,
-            saveState: true,
-            loadState: true,
-            fullscreen: true
-        };
-    </script>
-    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+        window.EJS_player        = '#game';
+        window.EJS_gameUrl       = './data/roms/nes/Tetris.nes';
+        window.EJS_core          = 'nes';
+        window.EJS_pathtodata    = './data/';
+        window.EJS_startOnLoaded = true;
 
+        const prompt = document.getElementById('custom-prompt');
+        const gameEl = document.getElementById('game');
+
+        function dismissPrompt() {
+            prompt.style.display = 'none';
+            gameEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+            gameEl.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+        }
+        prompt.addEventListener('click', dismissPrompt);
+        prompt.addEventListener('touchstart', dismissPrompt, { passive: true });
+        gameEl.addEventListener('click', () => {
+            if (prompt.style.display !== 'none') prompt.style.display = 'none';
+        });
+
+        const keyMap = {
+            ArrowUp:    { key: 'ArrowUp',    code: 'ArrowUp'    },
+            ArrowDown:  { key: 'ArrowDown',  code: 'ArrowDown'  },
+            ArrowLeft:  { key: 'ArrowLeft',  code: 'ArrowLeft'  },
+            ArrowRight: { key: 'ArrowRight', code: 'ArrowRight' },
+            z:          { key: 'z',          code: 'KeyZ'       },
+            x:          { key: 'x',          code: 'KeyX'       },
+            Enter:      { key: 'Enter',      code: 'Enter'      },
+            v:          { key: 'v',          code: 'KeyV'       }
+        };
+        function fireKey(type, keyName) {
+            const info = keyMap[keyName];
+            if (!info) return;
+            window.dispatchEvent(new KeyboardEvent(type, {
+                key: info.key, code: info.code, bubbles: true, cancelable: true
+            }));
+        }
+
+        document.querySelectorAll('#touch-controls button[data-key]').forEach(btn => {
+            const keyName = btn.dataset.key;
+            const activeTouches = new Set();
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                for (const t of e.changedTouches) {
+                    if (!activeTouches.has(t.identifier)) {
+                        activeTouches.add(t.identifier);
+                        fireKey('keydown', keyName);
+                    }
+                }
+            }, { passive: false });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                for (const t of e.changedTouches) {
+                    if (activeTouches.delete(t.identifier) && activeTouches.size === 0) {
+                        fireKey('keyup', keyName);
+                    }
+                }
+            }, { passive: false });
+            btn.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                for (const t of e.changedTouches) {
+                    if (activeTouches.delete(t.identifier) && activeTouches.size === 0) {
+                        fireKey('keyup', keyName);
+                    }
+                }
+            }, { passive: false });
+            btn.addEventListener('mousedown', (e) => { e.preventDefault(); fireKey('keydown', keyName); });
+            btn.addEventListener('mouseup',   (e) => { e.preventDefault(); fireKey('keyup',   keyName); });
+            btn.addEventListener('mouseleave',(e) => { if (e.buttons === 1) fireKey('keyup', keyName); });
+        });
+    </script>
+
+    <script src="./data/loader.js"></script>
 </body>
 </html>
