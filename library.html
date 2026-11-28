@@ -55,7 +55,7 @@
             <div class="game-grid">
 
                 <!-- Tetris -->
-                <div class="game-card" data-tags="nes tetris">
+                <a href="#" class="game-card" data-tags="nes tetris">
                     <div class="card-img-wrapper">
                         <img src="https://via.placeholder.com/300x200/1a0b2e/00ffff?text=Tetris" alt="Tetris">
                         <span class="status-badge available">Available</span>
@@ -66,10 +66,10 @@
                             <span class="tag">NES</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Contra -->
-                <div class="game-card" data-tags="nes contra">
+                <a href="#" class="game-card" data-tags="nes contra">
                     <div class="card-img-wrapper">
                         <img src="https://via.placeholder.com/300x200/1a0b2e/00ffff?text=Contra" alt="Contra">
                         <span class="status-badge available">Available</span>
@@ -80,10 +80,10 @@
                             <span class="tag">NES</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Super Mario Bros 3 -->
-                <div class="game-card" data-tags="nes mario">
+                <a href="#" class="game-card" data-tags="nes mario">
                     <div class="card-img-wrapper">
                         <img src="https://via.placeholder.com/300x200/1a0b2e/ffff00?text=Super+Mario+Bros+3" alt="Super Mario Bros 3">
                         <span class="status-badge limited">Limited time free</span>
@@ -94,10 +94,10 @@
                             <span class="tag">NES</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Legend of Zelda -->
-                <div class="game-card" data-tags="nes zelda">
+                <a href="#" class="game-card" data-tags="nes zelda">
                     <div class="card-img-wrapper">
                         <img src="https://via.placeholder.com/300x200/1a0b2e/00ffff?text=Zelda" alt="Legend of Zelda">
                         <span class="status-badge available">Available</span>
@@ -108,7 +108,7 @@
                             <span class="tag">NES</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
             </div>
         </section>
@@ -119,7 +119,7 @@
             <div class="game-grid">
 
                 <!-- DOOM -->
-                <div class="game-card" data-tags="arcade doom">
+                <a href="#" class="game-card" data-tags="arcade doom">
                     <div class="card-img-wrapper">
                         <img src="https://via.placeholder.com/300x200/1a0b2e/ff00ff?text=DOOM" alt="DOOM">
                         <span class="status-badge soon">Coming Soon</span>
@@ -130,10 +130,10 @@
                             <span class="tag">Arcade</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Sonic -->
-                <div class="game-card" data-tags="sega sonic">
+                <a href="#" class="game-card" data-tags="sega sonic">
                     <div class="card-img-wrapper">
                         <img src="https://via.placeholder.com/300x200/1a0b2e/ff00ff?text=Sonic" alt="Sonic">
                         <span class="status-badge soon">Coming Soon</span>
@@ -144,10 +144,10 @@
                             <span class="tag">SEGA Megadrive</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Streets of Rage -->
-                <div class="game-card" data-tags="sega streets">
+                <a href="#" class="game-card" data-tags="sega streets">
                     <div class="card-img-wrapper">
                         <img src="https://via.placeholder.com/300x200/1a0b2e/ff00ff?text=Streets+of+Rage" alt="Streets of Rage">
                         <span class="status-badge soon">Coming Soon</span>
@@ -158,7 +158,7 @@
                             <span class="tag">SEGA Megadrive</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
             </div>
         </section>
@@ -181,7 +181,6 @@
                     gameCards.forEach(card => {
                         const cardTags = card.getAttribute('data-tags');
                         
-                        // Check if the card's tags include the filter value
                         if (filterValue === 'all' || cardTags.includes(filterValue)) {
                             card.style.display = 'block';
                             card.style.animation = 'none';
